@@ -53,7 +53,7 @@ function plugin_version_audittrail()
    return [
       'name' => "Audit Trail",
       'version' => PLUGIN_AUDITTRAIL_VERSION,
-      'author' => "Antigravity",
+      'author' => "Juan Carlos Acosta Perabá",
       'license' => "GPLv2+",
       'homepage' => 'https://github.com/JuanCarlosAcostaPeraba/glpi-audittrail-plugin',
       'requirements' => [
