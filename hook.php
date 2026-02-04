@@ -30,7 +30,7 @@ function plugin_audittrail_install()
          INDEX `item` (`itemtype`, `items_id`),
          INDEX `users_id` (`users_id`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-        $DB->queryOrDie($query, $DB->error());
+        $DB->doQuery($query);
     }
 
     $migration->executeMigration();
@@ -47,8 +47,7 @@ function plugin_audittrail_uninstall()
 {
     global $DB;
 
-    $query = "DROP TABLE IF EXISTS `glpi_plugin_audittrail_logs`";
-    $DB->queryOrDie($query, $DB->error());
+    $DB->dropTable('glpi_plugin_audittrail_logs');
 
     return true;
 }
