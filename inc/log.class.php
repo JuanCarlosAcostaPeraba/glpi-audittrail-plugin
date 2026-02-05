@@ -183,22 +183,40 @@ class PluginAudittrailLog extends CommonDBTM
         echo "<div class='center'>";
         echo "<h2>" . __('Audit Trail', 'audittrail') . "</h2>";
 
-        // Get logs for the ticket itself and for its tasks
+        // Get task IDs first to avoid subquery issues in the iterator
+        $task_ids = [];
+        $task_iterator = $DB->request([
+            'SELECT' => 'id',
+            'FROM' => 'glpi_tickettasks',
+            'WHERE' => ['tickets_id' => $items_id]
+        ]);
+        foreach ($task_iterator as $row) {
+            $task_ids[] = (int) $row['id'];
+        }
+
+        $where = [
+            'itemtype' => 'Ticket',
+            'items_id' => $items_id
+        ];
+
+        // If there are tasks, include them in the query with OR
+        if (!empty($task_ids)) {
+            $where = [
+                'OR' => [
+                    $where,
+                    [
+                        'itemtype' => 'TicketTask',
+                        'items_id' => $task_ids
+                    ]
+                ]
+            ];
+        }
+
+        // Get logs
         $iterator = $DB->request([
             'SELECT' => '*',
             'FROM' => 'glpi_plugin_audittrail_logs',
-            'WHERE' => [
-                'OR' => [
-                    [
-                        'itemtype' => 'Ticket',
-                        'items_id' => $items_id
-                    ],
-                    [
-                        'itemtype' => 'TicketTask',
-                        'items_id' => new QueryExpression("IN (SELECT `id` FROM `glpi_tickettasks` WHERE `tickets_id` = $items_id)")
-                    ]
-                ]
-            ],
+            'WHERE' => $where,
             'ORDER' => 'date_mod DESC'
         ]);
 
