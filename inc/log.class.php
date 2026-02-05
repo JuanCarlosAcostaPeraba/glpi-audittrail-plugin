@@ -154,7 +154,7 @@ class PluginAudittrailLog extends CommonDBTM
     function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
     {
         if ($item->getType() == 'Ticket') {
-            return __('Audit Trail', 'audittrail');
+            return "Histórico de Auditoría";
         }
         return '';
     }
@@ -181,7 +181,7 @@ class PluginAudittrailLog extends CommonDBTM
         $items_id = $ticket->getID();
 
         echo "<div class='center'>";
-        echo "<h2>" . __('Audit Trail', 'audittrail') . "</h2>";
+        echo "<h2>Histórico de Auditoría</h2>";
 
         // Get task IDs first to avoid subquery issues in the iterator
         $task_ids = [];
@@ -223,39 +223,46 @@ class PluginAudittrailLog extends CommonDBTM
         if (count($iterator)) {
             echo "<table class='tab_cadre_fixehov' style='width: 100%; border-collapse: collapse;'>";
             echo "<tr>";
-            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>" . __('Date') . "</th>";
-            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>" . __('User') . "</th>";
-            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>" . __('Item') . "</th>";
-            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>" . __('Action') . "</th>";
-            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>" . __('Field') . "</th>";
-            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>" . __('Old value') . "</th>";
-            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>" . __('New value') . "</th>";
+            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>Fecha</th>";
+            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>Usuario</th>";
+            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>Elemento</th>";
+            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>Acción</th>";
+            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>Campo</th>";
+            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>Valor anterior</th>";
+            echo "<th style='padding: 8px; border-bottom: 2px solid #ddd;'>Valor nuevo</th>";
             echo "</tr>";
 
             foreach ($iterator as $data) {
                 $user = new User();
-                $username = $data['users_id'] ? ($user->getFromDB($data['users_id']) ? $user->getName() : $data['users_id']) : __('System');
+                $username = $data['users_id'] ? ($user->getFromDB($data['users_id']) ? $user->getName() : $data['users_id']) : "Sistema";
 
                 $item_label = $data['itemtype'];
                 if ($data['itemtype'] == 'TicketTask') {
-                    $item_label = __('Ticket Task', 'audittrail') . " (" . $data['items_id'] . ")";
+                    $item_label = "Tarea de ticket (" . $data['items_id'] . ")";
                 } else {
-                    $item_label = __('Ticket') . " (" . $data['items_id'] . ")";
+                    $item_label = "Ticket (" . $data['items_id'] . ")";
                 }
 
                 $badge_color = '#6c757d'; // Default
-                if ($data['action'] == 'create')
+                $action_label = $data['action'];
+                if ($data['action'] == 'create') {
                     $badge_color = '#28a745';
-                if ($data['action'] == 'update')
+                    $action_label = "creación";
+                }
+                if ($data['action'] == 'update') {
                     $badge_color = '#ffc107';
-                if ($data['action'] == 'delete')
+                    $action_label = "modificación";
+                }
+                if ($data['action'] == 'delete') {
                     $badge_color = '#dc3545';
+                    $action_label = "eliminación";
+                }
 
                 echo "<tr class='tab_bg_1'>";
                 echo "<td style='padding: 8px;'>" . Html::convDateTime($data['date_mod']) . "</td>";
                 echo "<td style='padding: 8px;'>" . $username . "</td>";
                 echo "<td style='padding: 8px;'>" . $item_label . "</td>";
-                echo "<td style='padding: 8px;'><span style='background-color: $badge_color; color: white; padding: 2px 6px; border-radius: 4px;'>" . __($data['action']) . "</span></td>";
+                echo "<td style='padding: 8px;'><span style='background-color: $badge_color; color: white; padding: 2px 6px; border-radius: 4px;'>" . $action_label . "</span></td>";
                 echo "<td style='padding: 8px; font-weight: bold;'>" . ($data['field'] ?? '-') . "</td>";
                 echo "<td style='padding: 8px; font-style: italic; color: #777;'>" . nl2br(Html::entities_deep($data['old_value'] ?? '')) . "</td>";
                 echo "<td style='padding: 8px; color: #000;'>" . nl2br(Html::entities_deep($data['new_value'] ?? '')) . "</td>";
@@ -263,7 +270,7 @@ class PluginAudittrailLog extends CommonDBTM
             }
             echo "</table>";
         } else {
-            echo "<p>" . __('No logs found', 'audittrail') . "</p>";
+            echo "<p>No se han encontrado registros.</p>";
         }
 
         echo "</div>";
